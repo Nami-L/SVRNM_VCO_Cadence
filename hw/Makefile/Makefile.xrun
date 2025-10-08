@@ -27,13 +27,10 @@ C_DIR   := $(GIT_DIR)/hw/c
 
 # Simulation configuration
 SEED      ?= 1
-GUI_MODE  ?= false
+
 RUN_FLAGS ?= 
 
 # ================================ CONTROL ==================================
-ifeq ($(GUI_MODE),true)
-	RUN_FLAGS += -gui &
-endif
 
 # ============================== TOOLS SETUP ================================
 # Files
@@ -43,8 +40,10 @@ C_FILES   := $(shell find $(C_DIR) -name "*.c" -or -name "*.c++")
 FILES     = $(TB_FILES) $(RTL_FILES)  $(C_FILES)
 
 # Cadence Xcelium options
-XRUN_FLAGS = -access +r \
-            -nowarn DLCRDB $(FILES) 
+XRUN_FLAGS = $(FILES)  -access +r \
+            -nowarn DLCRDB
+XRUN_FLAGS_GUI = $(FILES)  -access +r \
+            -nowarn DLCRDB -gui
 
 # Colors
 C_RED := \033[31m
@@ -88,12 +87,14 @@ vars: ## Print Makefile variables
 compile: ## Parse and compile RTL and simulation sources VCS
 	@echo -e "$(C_ORA)Compiling project$(NC)"
 	@mkdir -p $(RUN_DIR)/sim
-	cd $(RUN_DIR)/sim && xrun $(XRUN_FLAGS)
+	cd $(RUN_DIR)/sim && xrun $(XRUN_FLAGS) 
 
 #______________________________________________________________________________
 .PHONY: sim
 sim: ## Compile and run simulation with the GUI
-	@$(MAKE) compile GUI_MODE=true
+	@echo -e "$(C_ORA)Opening GUI project$(NC)"
+	cd $(RUN_DIR)/sim && xrun $(XRUN_FLAGS_GUI) 
+
 	
 #______________________________________________________________________________
 .PHONY: clean
